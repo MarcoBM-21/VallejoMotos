@@ -58,9 +58,9 @@ if (!$producto) {
                         id="codigo"
                         class="form-control"
                         placeholder="Escribe el código de barras del producto"
-                        maxlength="6"
-                        pattern="\d{6}"
-                        title="Debe ser un código de 6 dígitos numéricos"
+                        maxlength="20"
+                        pattern="^[A-Za-z0-9\-]{1,20}$"
+                        title="Debe ser un código de 20 dígitos numéricos"
                         onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                         value="<?= htmlspecialchars($producto->codigo); ?>"
                     >
@@ -201,16 +201,13 @@ if (isset($_POST['registrar'])) {
         exit;
     }
 
-    // Validar formato del código de barras
-    if (!preg_match('/^\d{6}$/', $codigo)) {
+    // Código: hasta 20 caracteres, letras, números y guiones
+    if (!preg_match('/^[A-Za-z0-9\-]{1,20}$/', $codigo)) {
         echo '
-        <div class="container mt-3">
-            <div class="alert alert-danger" role="alert">
-                El código de barras debe ser de 6 dígitos numéricos.
-            </div>
+        <div class="alert alert-danger mt-3" role="alert">
+            El código debe tener como máximo 20 caracteres y solo puede contener letras, números y guiones.
         </div>';
-        include_once "footer.php";
-        exit;
+        return;
     }
 
     // (Opcional pero recomendable) validar que no se repita el código en otro producto
