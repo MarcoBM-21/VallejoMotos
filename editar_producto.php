@@ -51,20 +51,22 @@ if (!$producto) {
             <form method="post">
                 <!-- Código de barras -->
                 <div class="mb-3">
-                    <label for="codigo" class="form-label">Código de barras (Max. 6 valores numéricos)</label>
+                    <label for="codigo" class="form-label">
+                        Código de barras (Máx. 20 caracteres alfanuméricos y guiones)
+                    </label>
                     <input
                         type="text"
                         name="codigo"
                         id="codigo"
                         class="form-control"
-                        placeholder="Escribe el código de barras del producto"
+                        placeholder="Escribe el código del producto"
                         maxlength="20"
                         pattern="^[A-Za-z0-9\-]{1,20}$"
-                        title="Debe ser un código de 20 dígitos numéricos"
-                        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                        title="El código puede tener hasta 20 caracteres, letras, números y guiones."
                         value="<?= htmlspecialchars($producto->codigo); ?>"
                     >
                 </div>
+
 
                 <!-- Nombre y Marca -->
                 <div class="row g-3 mb-3">
