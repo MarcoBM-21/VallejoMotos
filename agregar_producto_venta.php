@@ -1,45 +1,56 @@
-<?php   
-    include_once "funciones.php";
-    session_start();
-    if(isset($_POST['agregar'])){
-    
-        if(isset($_POST['codigo'])) {
-            $codigo = $_POST['codigo'];
-            $producto = obtenerProductoPorCodigo($codigo);
-            
-            if (!ctype_digit($codigo) || strlen($codigo) != 6) {
-                echo "<script type='text/javascript'>
-                        alert('El código debe tener exactamente 6 dígitos.');
-                        window.location.href='vender.php';
-                      </script>";
-                return;
-            }
+<?php
+session_start();
+include_once "funciones.php";
 
-            if(!$producto) {
-                echo "
-                <script type='text/javascript'>
-                    window.location.href='vender.php'
-                    alert('No se ha encontrado el producto')
-                </script>";
-                return;
-            }
+// Agregar producto al carrito de venta
+if (!isset($_POST['agregar'])) {
+    header("Location: vender.php");
+    exit;
+}
 
-            if ($producto) {
-                if ($producto->existencia > 0) {
-                    // Si hay stock, agregar a la lista de venta
-                    $_SESSION['lista'][] = $producto;
-                    $producto->cantidad = 1; // Puedes ajustar la cantidad según sea necesario
-                } else {
-                    // Si no hay stock, establecer un mensaje de error en la sesión
-                    $_SESSION['mensaje_error'] = "El producto '{$producto->nombre}' se encuentra sin stock.";
-                }
-            }
-            
-            print_r($producto);
-            $_SESSION['lista'] = agregarProductoALista($producto,  $_SESSION['lista']);
-            unset($_POST['codigo']);
-            header("location: vender.php");
-        }
-    }
+// Validar que venga el código
+if (!isset($_POST['codigo'])) {
+    $_SESSION['mensaje_error'] = "Debes ingresar un código de producto.";
+    header("Location: vender.php");
+    exit;
+}
 
-?>
+$codigo = trim($_POST['codigo']);
+
+// Validar formato de código (6 dígitos numéricos)
+if (!ctype_digit($codigo) || strlen($codigo) !== 6) {
+    $_SESSION['mensaje_error'] = "El código debe tener exactamente 6 dígitos.";
+    header("Location: vender.php");
+    exit;
+}
+
+// Buscar producto por código
+$producto = obtenerProductoPorCodigo($codigo);
+
+if (!$producto) {
+    $_SESSION['mensaje_error'] = "No se ha encontrado el producto.";
+    header("Location: vender.php");
+    exit;
+}
+
+// Validar stock
+if ($producto->existencia <= 0) {
+    $_SESSION['mensaje_error'] = "El producto '{$producto->nombre}' se encuentra sin stock.";
+    header("Location: vender.php");
+    exit;
+}
+
+// Asegurar cantidad inicial
+$producto->cantidad = 1;
+
+// Inicializar lista si no existe
+if (!isset($_SESSION['lista']) || !is_array($_SESSION['lista'])) {
+    $_SESSION['lista'] = [];
+}
+
+// Agregar o incrementar en la lista
+$_SESSION['lista'] = agregarProductoALista($producto, $_SESSION['lista']);
+
+header("Location: vender.php");
+exit;
+

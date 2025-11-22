@@ -1,86 +1,161 @@
 <?php
-include_once "encabezado.php";
-include_once "navbar.php";
+// Sesión y acceso
 session_start();
-
-if(empty($_SESSION['usuario'])) header("location: login.php");
-
-$id = $_GET['id'];
-if (!$id) {
-    echo 'No se ha seleccionado el cliente';
+if (empty($_SESSION['usuario'])) {
+    header("Location: login.php");
     exit;
 }
-include_once "funciones.php";
-$cliente = obtenerClientePorId($id);
+
+// Funciones
+require_once "funciones.php";
+
+// Mensaje para alertas
+$mensaje = null;
+
+// ID del cliente a editar
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$cliente = null;
+
+if ($id <= 0) {
+    $mensaje = [
+        'tipo'  => 'danger',
+        'texto' => 'No se ha seleccionado el cliente.'
+    ];
+} else {
+    $cliente = obtenerClientePorId($id);
+    if (!$cliente) {
+        $mensaje = [
+            'tipo'  => 'danger',
+            'texto' => 'Cliente no encontrado.'
+        ];
+    }
+}
+
+// Actualizar datos del cliente
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['actualizar']) && $cliente) {
+    $nombre    = trim($_POST['nombre']    ?? '');
+    $telefono  = trim($_POST['telefono']  ?? '');
+    $direccion = trim($_POST['direccion'] ?? '');
+
+    // Campos obligatorios
+    if ($nombre === '' || $telefono === '' || $direccion === '') {
+        $mensaje = [
+            'tipo'  => 'danger',
+            'texto' => 'Debes completar todos los datos.'
+        ];
+    }
+    // Nombre solo letras y espacios
+    elseif (!preg_match('/^[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]+$/', $nombre)) {
+        $mensaje = [
+            'tipo'  => 'danger',
+            'texto' => 'El nombre no debe contener números ni caracteres especiales.'
+        ];
+    }
+    // Teléfono: 9 dígitos numéricos
+    elseif (!ctype_digit($telefono) || strlen($telefono) !== 9) {
+        $mensaje = [
+            'tipo'  => 'danger',
+            'texto' => 'El número de teléfono debe tener 9 dígitos numéricos.'
+        ];
+    }
+    // Teléfono debe empezar con 9
+    elseif ($telefono[0] !== '9') {
+        $mensaje = [
+            'tipo'  => 'danger',
+            'texto' => 'El número de teléfono debe comenzar con el dígito 9.'
+        ];
+    } else {
+        // Persistir cambios
+        $resultado = editarCliente($nombre, $telefono, $direccion, $id);
+
+        if ($resultado) {
+            $mensaje = [
+                'tipo'  => 'success',
+                'texto' => 'Información del cliente actualizada con éxito.'
+            ];
+
+            // Refrescar datos en memoria
+            $cliente->nombre    = $nombre;
+            $cliente->telefono  = $telefono;
+            $cliente->direccion = $direccion;
+        } else {
+            $mensaje = [
+                'tipo'  => 'danger',
+                'texto' => 'Error al actualizar la información del cliente.'
+            ];
+        }
+    }
+}
+
+// Vista
+include_once "encabezado.php";
+include_once "navbar.php";
 ?>
 
 <div class="container">
-    <h3>Editar cliente</h3>
-    <form method="post">
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" name="nombre" class="form-control" value="<?php echo $cliente->nombre;?>" id="nombre" placeholder="Escribe el nombre del cliente">
-        </div>
-        <div class="mb-3">
-            <label for="telefono" class="form-label">Teléfono</label>
-            <input type="text" name="telefono" class="form-control" value="<?php echo $cliente->telefono;?>" id="telefono" placeholder="Ej. 2111568974">
-        </div>
-        <div class="mb-3">
-            <label for="direccion" class="form-label">Dirección</label>
-            <input type="text" name="direccion" class="form-control" value="<?php echo $cliente->direccion;?>" id="direccion" placeholder="Ej. Av Collar 1005 Col Las Cruces">
-        </div>
+    <br>
+    <h3 class="mb-4">Editar cliente</h3>
 
-        <div class="text-center mt-3">
-            <input type="submit" name="registrar" value="Registrar" class="btn btn-primary btn-lg">
-            <a href="clientes.php" class="btn btn-danger btn-lg">
-                <i class="fa fa-times"></i> 
-                Cancelar
-            </a>
+    <?php if ($mensaje): ?>
+        <div class="alert alert-<?= htmlspecialchars($mensaje['tipo']); ?> mt-2" role="alert">
+            <?= htmlspecialchars($mensaje['texto']); ?>
         </div>
-    </form>
+    <?php endif; ?>
+
+    <?php if ($cliente): ?>
+        <form method="post">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input
+                    type="text"
+                    name="nombre"
+                    class="form-control"
+                    id="nombre"
+                    placeholder="Escribe el nombre del cliente"
+                    value="<?= htmlspecialchars($cliente->nombre, ENT_QUOTES, 'UTF-8'); ?>"
+                >
+            </div>
+
+            <div class="mb-3">
+                <label for="telefono" class="form-label">Teléfono</label>
+                <input
+                    type="text"
+                    name="telefono"
+                    class="form-control"
+                    id="telefono"
+                    placeholder="Ej. 911156897"
+                    value="<?= htmlspecialchars($cliente->telefono, ENT_QUOTES, 'UTF-8'); ?>"
+                >
+            </div>
+
+            <div class="mb-3">
+                <label for="direccion" class="form-label">Dirección</label>
+                <input
+                    type="text"
+                    name="direccion"
+                    class="form-control"
+                    id="direccion"
+                    placeholder="Ej. Av Collar 1005 Col Las Cruces"
+                    value="<?= htmlspecialchars($cliente->direccion, ENT_QUOTES, 'UTF-8'); ?>"
+                >
+            </div>
+
+            <div class="text-center mt-3">
+                <input
+                    type="submit"
+                    name="actualizar"
+                    value="Actualizar"
+                    class="btn btn-primary btn-lg me-2"
+                >
+                <a href="clientes.php" class="btn btn-danger btn-lg">
+                    <i class="fa fa-times"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    <?php endif; ?>
 </div>
 
 <?php
-if(isset($_POST['registrar'])){
-    $nombre = $_POST['nombre'];
-    $telefono = $_POST['telefono'];
-    $direccion = $_POST['direccion'];
-
-    // Validación de campos vacíos
-    if(empty($nombre) || empty($telefono) || empty($direccion)){
-        echo '
-        <div class="alert alert-danger mt-3" role="alert">
-            Debes completar todos los datos.
-        </div>';
-        return;
-    }
-
-    // Validación de longitud del teléfono
-    if(strlen($telefono) != 9){
-        echo '
-        <div class="alert alert-danger mt-3" role="alert">
-            El número de teléfono debe tener 9 dígitos.
-        </div>';
-        return;
-    }
-
-    // Validación del primer dígito del teléfono
-    if($telefono[0] != '9'){
-        echo '
-        <div class="alert alert-danger mt-3" role="alert">
-            El número de teléfono debe comenzar con el dígito 9.
-        </div>';
-        return;
-    }
-
-    // Si pasa todas las validaciones, se procede a la actualización
-    include_once "funciones.php";
-    $resultado = editarCliente($nombre, $telefono, $direccion, $id);
-    if($resultado){
-        echo '
-        <div class="alert alert-success mt-3" role="alert">
-            Información del cliente actualizada con éxito.
-        </div>';
-    }
-}
+include_once "footer.php";
 ?>

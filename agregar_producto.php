@@ -1,91 +1,205 @@
 <?php
+// Sesión y control de acceso
+session_start();
+if (empty($_SESSION['usuario'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Funciones y acceso a BD
+require_once "funciones.php";
+
+// Layout base
 include_once "encabezado.php";
 include_once "navbar.php";
-session_start();
-
-if(empty($_SESSION['usuario'])) header("location: login.php");
-
 ?>
+
 <div class="container">
-    <h3>Agregar producto</h3>
-    <form method="post">
-        <div class="mb-3">
-            <label for="codigo" class="form-label">Código de barras (Max. 6 Valores númericos)</label>
-            <input type="text" name="codigo" class="form-control" id="codigo" placeholder="Escribe el código de barras del producto" maxlength="6" pattern="\d{6}" title="Debe ser un código de 6 dígitos numéricos" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
-            </div>
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre o descripción</label>
-            <input type="text" name="nombre" class="form-control" id="nombre" placeholder="Ej. Papas">
+    <br>
+    <h3 class="mb-4">Agregar producto</h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <!-- Formulario de alta de producto -->
+            <form method="post">
+                <!-- Código de barras (fila completa) -->
+                <div class="mb-3">
+                    <label for="codigo" class="form-label">
+                        Código de barras (Max. 6 valores numéricos)
+                    </label>
+                    <input
+                        type="text"
+                        name="codigo"
+                        class="form-control"
+                        id="codigo"
+                        placeholder="Escribe el código de barras del producto"
+                        maxlength="6"
+                        pattern="\d{6}"
+                        title="Debe ser un código de 6 dígitos numéricos"
+                        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                    >
+                </div>
+
+                <!-- Nombre y Marca en la misma fila -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre o descripción</label>
+                        <input
+                            type="text"
+                            name="nombre"
+                            class="form-control"
+                            id="nombre"
+                            placeholder="Ej. Casco integral"
+                        >
+                    </div>
+                    <div class="col-md-6">
+                        <label for="marca" class="form-label">Marca</label>
+                        <input
+                            type="text"
+                            name="marca"
+                            class="form-control"
+                            id="marca"
+                            placeholder="Ej. Yamaha, LS2, etc."
+                        >
+                    </div>
+                </div>
+
+                <!-- Ubicación y Existencia en la misma fila -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <label for="ubicacion" class="form-label">Ubicación en la tienda</label>
+                        <input
+                            type="text"
+                            name="ubicacion"
+                            class="form-control"
+                            id="ubicacion"
+                            placeholder="Ej. Pasillo 3, Estante B"
+                            maxlength="100"
+                        >
+                    </div>
+                    <div class="col-md-4">
+                        <label for="existencia" class="form-label">Existencia</label>
+                        <input
+                            type="number"
+                            name="existencia"
+                            step="any"
+                            id="existencia"
+                            class="form-control"
+                            placeholder="Existencia"
+                            min="0"
+                            oninput="this.value = Math.abs(this.value)"
+                        >
+                    </div>
+                </div>
+
+                <!-- Precio compra y Precio venta -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="compra" class="form-label">Precio compra</label>
+                        <input
+                            type="number"
+                            name="compra"
+                            step="any"
+                            id="compra"
+                            class="form-control"
+                            placeholder="Precio de compra"
+                            min="0"
+                            oninput="this.value = Math.abs(this.value)"
+                        >
+                    </div>
+                    <div class="col-md-6">
+                        <label for="venta" class="form-label">Precio venta</label>
+                        <input
+                            type="number"
+                            name="venta"
+                            step="any"
+                            id="venta"
+                            class="form-control"
+                            placeholder="Precio de venta"
+                            min="0"
+                            oninput="this.value = Math.abs(this.value)"
+                        >
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <input
+                        type="submit"
+                        name="registrar"
+                        value="Registrar"
+                        class="btn btn-primary btn-lg me-2"
+                    >
+                    <a class="btn btn-danger btn-lg" href="productos.php">
+                        <i class="fa fa-times"></i>
+                        Cancelar
+                    </a>
+                </div>
+            </form>
         </div>
-        <div class="row">
-            <div class="col">
-                <label for="compra" class="form-label">Precio compra</label>
-                <input type="number" name="compra" step="any" id="compra" class="form-control" placeholder="Precio de compra" aria-label="" min="0" oninput="this.value = Math.abs(this.value)">
-            </div>
-            <div class="col">
-                <label for="venta" class="form-label">Precio venta</label>
-                <input type="number" name="venta" step="any" id="venta" class="form-control" placeholder="Precio de venta" aria-label="" min="0" oninput="this.value = Math.abs(this.value)">
-            </div>
-            <div class="col">
-                <label for="existencia" class="form-label">Existencia</label>
-                <input type="number" name="existencia" step="any" id="existencia" class="form-control" placeholder="Existencia" aria-label="" min="0" oninput="this.value = Math.abs(this.value)">
-            </div>
-        </div>
-        <div class="text-center mt-3">
-            <input type="submit" name="registrar" value="Registrar" class="btn btn-primary btn-lg">
-            <a class="btn btn-danger btn-lg" href="productos.php">
-                <i class="fa fa-times"></i> 
-                Cancelar
-            </a>
-        </div>
-    </form>
+    </div>
 </div>
 
 <?php
-if(isset($_POST['registrar'])){
-    $codigo = $_POST['codigo'];
-    $nombre = $_POST['nombre'];
-    $compra = $_POST['compra'];
-    $venta = $_POST['venta'];
-    $existencia = $_POST['existencia'];
+// Manejo del POST del formulario
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar'])) {
+    $codigo     = $_POST['codigo']     ?? '';
+    $nombre     = $_POST['nombre']     ?? '';
+    $marca      = $_POST['marca']      ?? '';
+    $ubicacion  = $_POST['ubicacion']  ?? '';
+    $compra     = $_POST['compra']     ?? '';
+    $venta      = $_POST['venta']      ?? '';
+    $existencia = $_POST['existencia'] ?? '';
 
-    // Validación de campos vacíos
-    if(empty($codigo) || empty($nombre) || empty($compra) || empty($venta) || empty($existencia)){
-        echo '
-        <div class="alert alert-danger mt-3" role="alert">
-            Debes completar todos los datos.
-        </div>';
+    // Validar campos obligatorios
+    if (
+        empty($codigo)    ||
+        empty($nombre)    ||
+        empty($marca)     ||
+        empty($ubicacion) ||
+        empty($compra)    ||
+        empty($venta)     ||
+        empty($existencia)
+    ) {
+        echo '<div class="alert alert-danger mt-3" role="alert">
+                Debes completar todos los datos (incluyendo marca y ubicación).
+              </div>';
         return;
     }
 
-    // Validar que el código de barras sea de 6 dígitos numéricos
-    if(!preg_match('/^\d{6}$/', $codigo)){
-        echo '
-        <div class="alert alert-danger mt-3" role="alert">
-            El código de barras debe ser de 6 dígitos numéricos.
-        </div>';
+    // Código de barras: exactamente 6 dígitos
+    if (!preg_match('/^\d{6}$/', $codigo)) {
+        echo '<div class="alert alert-danger mt-3" role="alert">
+                El código de barras debe ser de 6 dígitos numéricos.
+              </div>';
         return;
     }
 
-    include_once "funciones.php";
-
-    // Verificar si el código de barras ya existe
+    // Verificar que el código no esté repetido
     $productoExistente = obtenerProductoPorCodigo($codigo);
-    if($productoExistente){
-        echo '
-        <div class="alert alert-danger mt-3" role="alert">
-            El código de barras ya existe en el sistema. Por favor, ingresa uno diferente.
-        </div>';
+    if ($productoExistente) {
+        echo '<div class="alert alert-danger mt-3" role="alert">
+                El código de barras ya existe en el sistema. Por favor, ingresa uno diferente.
+              </div>';
         return;
     }
 
-    // Registrar el producto si no existe
-    $resultado = registrarProducto($codigo, $nombre, $compra, $venta, $existencia);
-    if($resultado){
-        echo '
-        <div class="alert alert-success mt-3" role="alert">
-            Producto registrado con éxito.
-        </div>';
+    // Registrar el producto
+    $resultado = registrarProducto(
+        $codigo,
+        $nombre,
+        $marca,
+        $compra,
+        $venta,
+        $existencia,
+        $ubicacion
+    );
+
+    if ($resultado) {
+        echo '<div class="alert alert-success mt-3" role="alert">
+                Producto registrado con éxito.
+              </div>';
     }
 }
+
+include_once "footer.php";
 ?>

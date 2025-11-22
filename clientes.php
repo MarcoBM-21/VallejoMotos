@@ -1,22 +1,35 @@
 <?php
-include_once "encabezado.php";
-include_once "navbar.php";
-include_once "funciones.php";
 session_start();
 
-if(empty($_SESSION['usuario'])) header("location: login.php");
+// Si no hay usuario autenticado, volvemos al login
+if (empty($_SESSION['usuario'])) {
+    header("Location: login.php");
+    exit();
+}
 
+// Funciones y acceso a datos
+require_once "funciones.php";
 $clientes = obtenerClientes();
+
+// A partir de aquí recién incluimos la parte visual
+include_once "encabezado.php";
+include_once "navbar.php";
 ?>
+
 <div class="container">
     <br>
     <h1>
-        <a class="btn btn-lg" style="color:#fff; background:#466320;" href="agregar_cliente.php">
+        <a
+            class="btn btn-lg"
+            style="color:#fff; background:#0d47a1;"
+            href="agregar_cliente.php"
+        >
             <i class="fa fa-plus"></i>
             Agregar
         </a>
         Clientes
     </h1>
+
     <table class="table">
         <thead>
             <tr>
@@ -28,37 +41,44 @@ $clientes = obtenerClientes();
             </tr>
         </thead>
         <tbody>
-            <?php
-            foreach($clientes as $cliente){
-            ?>
+            <?php foreach ($clientes as $cliente): ?>
                 <tr>
-                    <td><?php echo $cliente->nombre; ?></td>
-                    <td><?php echo $cliente->telefono; ?></td>
-                    <td><?php echo $cliente->direccion; ?></td>
+                    <td><?= htmlspecialchars($cliente->nombre); ?></td>
+                    <td><?= htmlspecialchars($cliente->telefono); ?></td>
+                    <td><?= htmlspecialchars($cliente->direccion); ?></td>
+
                     <td>
-                        <a class="btn" style="color:#fff; background:#466320;" href="editar_cliente.php?id=<?php echo $cliente->id;?>">
+                        <a
+                            class="btn"
+                            style="color:#fff; background:#f77519;"
+                            href="editar_cliente.php?id=<?= $cliente->id; ?>"
+                        >
                             <i class="fa fa-edit"></i>
-                            Editar
                         </a>
                     </td>
+
                     <td>
-                        <!-- Modificamos el enlace de eliminación -->
-                        <a class="btn btn-danger" 
-                           href="eliminar_cliente.php?id=<?php echo $cliente->id;?>" 
-                           onclick="return confirmarEliminacion();">
-                            <i class="fa fa-trash"></i>
+                        <a
+                            href="eliminar_cliente.php?id=<?= $cliente->id; ?>"
+                            onclick="return confirmarEliminacion();"
+                            class="btn btn-danger"
+                        >
                             Eliminar
                         </a>
                     </td>
                 </tr>
-            <?php } ?>
-        </tbody>        
+            <?php endforeach; ?>
+        </tbody>
     </table>
 </div>
 
-<!-- JavaScript para mostrar mensaje de confirmación -->
 <script>
-function confirmarEliminacion() {
-    return confirm('¿Estás seguro de que deseas eliminar este cliente?');
-}
+    // Confirmación antes de eliminar un cliente
+    function confirmarEliminacion() {
+        return confirm('¿Estás seguro de que deseas eliminar este cliente?');
+    }
 </script>
+
+<?php
+include_once "footer.php";
+?>
