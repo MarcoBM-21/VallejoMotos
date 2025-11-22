@@ -94,7 +94,7 @@ Permite gestionar productos, clientes, usuarios y registrar ventas con control d
 ## 📁 Estructura del proyecto (simplificada)
 
 ```text
-BAMBOO- / VallejoMotos
+Vallejo Motos- / VallejoMotos
 ├── bootstrap/              # Archivos CSS/JS de Bootstrap y dependencias
 ├── img/                    # Imágenes, favicon y logotipo
 ├── webfonts/               # Fuentes de iconos
