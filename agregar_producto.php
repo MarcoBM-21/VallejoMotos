@@ -25,18 +25,17 @@ include_once "navbar.php";
                 <!-- Código de barras (fila completa) -->
                 <div class="mb-3">
                     <label for="codigo" class="form-label">
-                        Código de barras (Max. 6 valores numéricos)
+                        Código de barras (Max. 12 caracteres)
                     </label>
                     <input
                         type="text"
                         name="codigo"
                         class="form-control"
                         id="codigo"
-                        placeholder="Escribe el código de barras del producto"
-                        maxlength="6"
-                        pattern="\d{6}"
-                        title="Debe ser un código de 6 dígitos numéricos"
-                        onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                        placeholder="Escribe el código del producto"
+                        maxlength="12"
+                        pattern="^[A-Za-z0-9\-]{1,12}$"
+                        title="Máximo 12 caracteres. Solo letras, números y guiones."
                     >
                 </div>
 
@@ -166,11 +165,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar'])) {
         return;
     }
 
-    // Código de barras: exactamente 6 dígitos
-    if (!preg_match('/^\d{6}$/', $codigo)) {
-        echo '<div class="alert alert-danger mt-3" role="alert">
-                El código de barras debe ser de 6 dígitos numéricos.
-              </div>';
+    // Código: hasta 12 caracteres, letras, números y guiones
+    if (!preg_match('/^[A-Za-z0-9\-]{1,12}$/', $codigo)) {
+        echo '
+        <div class="alert alert-danger mt-3" role="alert">
+            El código debe tener como máximo 12 caracteres y solo puede contener letras, números y guiones.
+        </div>';
         return;
     }
 

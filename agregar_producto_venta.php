@@ -17,9 +17,9 @@ if (!isset($_POST['codigo'])) {
 
 $codigo = trim($_POST['codigo']);
 
-// Validar formato de código (6 dígitos numéricos)
-if (!ctype_digit($codigo) || strlen($codigo) !== 6) {
-    $_SESSION['mensaje_error'] = "El código debe tener exactamente 6 dígitos.";
+// Validar formato de código (12 caracteres permitidos)
+if ($codigo === '' || strlen($codigo) > 12) {
+    $_SESSION['mensaje_error'] = "El código debe tener máximo 12 caracteres.";
     header("Location: vender.php");
     exit;
 }
