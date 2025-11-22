@@ -6,10 +6,9 @@
     <div class="container-fluid">
         <!-- Logo / Inicio -->
         <a class="navbar-brand" href="index.php">
-            <img src="img/Logo_Main.png"
+            <img src="img\Logo_Relative.png"
                  alt="Vallejo Motos"
-                 width="50"
-                 height="50"
+                 width="100"
                  class="d-inline-block align-text-top">
         </a>
 

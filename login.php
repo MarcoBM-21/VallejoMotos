@@ -8,7 +8,7 @@ include_once "encabezado.php"
                 <img 
                     src="img\Logo_Main.png" 
                     class="img-fluid"
-                    style="max-height: 320px;"
+                    style="max-height: 75vh;"
                     alt="Logo Vallejo Motos"
                 >
             </div>
