@@ -61,7 +61,7 @@ if (!$producto) {
                         class="form-control"
                         placeholder="Escribe el código del producto"
                         maxlength="20"
-                        pattern="^[A-Za-z0-9\-]{1,20}$"
+                        pattern="^[A-Za-z0-9\-\$\%_\.\=\#Ññ]{1,20}$"
                         title="El código puede tener hasta 20 caracteres, letras, números y guiones."
                         value="<?= htmlspecialchars($producto->codigo); ?>"
                     >
@@ -133,9 +133,15 @@ if (!$producto) {
                             id="compra"
                             class="form-control"
                             placeholder="Precio de compra"
-                            step="any"
+                            step="0.01"
                             min="0"
-                            oninput="this.value = Math.abs(this.value)"
+                            oninput="
+                                if (this.value.includes('.')) {
+                                const parts = this.value.split('.');
+                                parts[1] = parts[1].slice(0, 2); // Máx 2 decimales
+                                this.value = parts[0] + '.' + parts[1];
+                                }
+                            "
                             value="<?= htmlspecialchars($producto->compra); ?>"
                         >
                     </div>
@@ -147,9 +153,15 @@ if (!$producto) {
                             id="venta"
                             class="form-control"
                             placeholder="Precio de venta"
-                            step="any"
+                            step="0.01"
                             min="0"
-                            oninput="this.value = Math.abs(this.value)"
+                            oninput="
+                                if (this.value.includes('.')) {
+                                const parts = this.value.split('.');
+                                parts[1] = parts[1].slice(0, 2); // Máx 2 decimales
+                                this.value = parts[0] + '.' + parts[1];
+                                }
+                            "
                             value="<?= htmlspecialchars($producto->venta); ?>"
                         >
                     </div>

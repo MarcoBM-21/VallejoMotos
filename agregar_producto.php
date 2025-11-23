@@ -34,8 +34,8 @@ include_once "navbar.php";
                         id="codigo"
                         placeholder="Escribe el código del producto"
                         maxlength="20"
-                        pattern="^[A-Za-z0-9\-]{1,20}$"
-                        title="Máximo 20 caracteres. Solo letras, números y guiones."
+                        pattern="^[A-Za-z0-9\-\$\%_\.\=\#Ññ]{1,20}$"
+                        title="Máximo 20 caracteres. Solo admite algunos caracteres especiales"
                     >
                 </div>
 
@@ -98,12 +98,18 @@ include_once "navbar.php";
                         <input
                             type="number"
                             name="compra"
-                            step="any"
+                            step="0.01"
                             id="compra"
                             class="form-control"
                             placeholder="Precio de compra"
                             min="0"
-                            oninput="this.value = Math.abs(this.value)"
+                            oninput="
+                                if (this.value.includes('.')) {
+                                const parts = this.value.split('.');
+                                parts[1] = parts[1].slice(0, 2); // Máx 2 decimales
+                                this.value = parts[0] + '.' + parts[1];
+                                }
+                            "
                         >
                     </div>
                     <div class="col-md-6">
@@ -111,12 +117,18 @@ include_once "navbar.php";
                         <input
                             type="number"
                             name="venta"
-                            step="any"
+                            step="0.01"
                             id="venta"
                             class="form-control"
                             placeholder="Precio de venta"
                             min="0"
-                            oninput="this.value = Math.abs(this.value)"
+                            oninput="
+                                if (this.value.includes('.')) {
+                                const parts = this.value.split('.');
+                                parts[1] = parts[1].slice(0, 2); // Máx 2 decimales
+                                this.value = parts[0] + '.' + parts[1];
+                                }
+                            "
                         >
                     </div>
                 </div>
@@ -165,11 +177,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registrar'])) {
         return;
     }
 
-    // Código: hasta 20 caracteres, letras, números y guiones
-    if (!preg_match('/^[A-Za-z0-9\-]{1,20}$/', $codigo)) {
+    // Código: hasta 20 caracteres con algunos que son especiales.
+    if (!preg_match('/^[A-Za-z0-9\-\$\%_\.\=\#Ññ]{1,20}$/', $codigo)) {
         echo '
         <div class="alert alert-danger mt-3" role="alert">
-            El código debe tener como máximo 12 caracteres y solo puede contener letras, números y guiones.
+            El código debe tener como máximo 20 caracteres y solo contiene algunos caracteres especiales.
         </div>';
         return;
     }
