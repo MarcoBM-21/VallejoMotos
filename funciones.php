@@ -707,22 +707,35 @@ function registrarUsuario($usuario, $nombre, $telefono, $direccion)
 }
 
 /**
- * Registro de venta + detalle de productos.
+ * Registro de la venta y sus productos.
  */
-function registrarVenta($productos, $idUsuario, $idCliente, $total)
+function registrarVenta(array $productos, int $idUsuario, ?int $idCliente, float $total): bool
 {
-    $sentencia  = "INSERT INTO ventas (fecha, total, idUsuario, idCliente) VALUES (?,?,?,?)";
-    $parametros = [date("Y-m-d H:i:s"), $total, $idUsuario, $idCliente];
+    $sql = "INSERT INTO ventas (fecha, total, idUsuario, idCliente)
+            VALUES (?, ?, ?, ?)";
 
-    $resultadoVenta = insertar($sentencia, $parametros);
-    if ($resultadoVenta) {
-        $idVenta              = obtenerUltimoIdVenta();
-        $productosRegistrados = registrarProductosVenta($productos, $idVenta);
-        return $resultadoVenta && $productosRegistrados;
+    $params = [
+        date("Y-m-d H:i:s"),
+        $total,
+        $idUsuario,
+        // Si viene null, PDO lo insertará como NULL en la columna
+        $idCliente,
+    ];
+
+    $resultadoVenta = insertar($sql, $params);
+
+    if (!$resultadoVenta) {
+        return false;
     }
 
-    return false;
+    $idVenta = obtenerUltimoIdVenta();
+
+    // Registro el detalle de productos de la venta
+    $productosRegistrados = registrarProductosVenta($productos, $idVenta);
+
+    return $resultadoVenta && $productosRegistrados;
 }
+
 
 /**
  * Helper para SELECT genérico.

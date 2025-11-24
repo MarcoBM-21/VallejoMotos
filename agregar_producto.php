@@ -114,7 +114,7 @@ include_once "navbar.php";
                     </div>
                     <div class="col-md-6">
                         <label for="venta" class="form-label">Precio venta</label>
-                        <input
+                        <input  
                             type="number"
                             name="venta"
                             step="0.01"
